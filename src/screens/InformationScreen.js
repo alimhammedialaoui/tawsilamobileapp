@@ -30,7 +30,7 @@ const InformationScreen = ({ navigation }) => {
           <Text style={styles.headerTextStyle}>
             Fill the form below with your information:
           </Text>
-          <View style={styles.formStyle}>
+          <View>
             <View style={styles.inputStyle}>
               <TextInput
                 keyboardType="numeric"
@@ -141,7 +141,7 @@ const InformationScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.TouchableOpacityStyle}
-              onPress={() => {}}
+              onPress={() => navigation.navigate("Search")}
             >
               <Text style={styles.ButtonTextStyle}>Submit</Text>
             </TouchableOpacity>
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#D8D8D8",
     borderRadius: 8,
     height: 55,
-    marginHorizontal: 60,
+    marginHorizontal: 40,
     flex: 3,
   },
   rangeTextStyle: {
