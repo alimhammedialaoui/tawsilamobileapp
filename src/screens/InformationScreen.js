@@ -6,11 +6,13 @@ import {
   TouchableWithoutFeedback,
   View,
   Keyboard,
+  Platform,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { RadioButton } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
 import { Checkbox } from "react-native-paper";
+import { useEffect } from "react";
 
 const InformationScreen = ({ navigation }) => {
   const [checked, setChecked] = useState("homme");
@@ -22,6 +24,18 @@ const InformationScreen = ({ navigation }) => {
       {children}
     </TouchableWithoutFeedback>
   );
+  const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+  if (Platform.OS === "ios") {
+    useEffect(() => {
+      setShowDate(true);
+      setShowTime(true);
+    }, []);
+  }
+  const nextPageStateFix = {
+    isDateShowed: showDate,
+    isTimeShowed: showTime,
+  };
 
   return (
     <>
@@ -141,7 +155,12 @@ const InformationScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.TouchableOpacityStyle}
-              onPress={() => navigation.navigate("Search")}
+              onPress={() =>
+                navigation.navigate("Search", {
+                  isDateShowed: showDate,
+                  isTimeShowed: showTime,
+                })
+              }
             >
               <Text style={styles.ButtonTextStyle}>Submit</Text>
             </TouchableOpacity>

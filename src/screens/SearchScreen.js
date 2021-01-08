@@ -9,31 +9,44 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   FlatList,
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-const SearchScreen = ({ navigation }) => {
+const SearchScreen = ({ route, navigation }) => {
+  const { isDateShowed, isTimeShowed } = {
+    isDateShowed: navigation.getParam("isDateShowed"),
+    isTimeShowed: navigation.getParam("isTimeShowed"),
+  };
   const departures = [
     {
       id: 1,
       stationName: "Rabat Agdal",
       city: "Rabat",
+      label: "Rabat Agdal",
+      value: 1,
     },
     {
       id: 2,
       stationName: "Rabat Ville",
       city: "Rabat",
+      label: "Rabat Ville",
+      value: 2,
     },
     {
       id: 3,
       stationName: "Casa Voyageurs",
       city: "Casablanca",
+      label: "Casa Voyageurs",
+      value: 3,
     },
     {
       id: 4,
       stationName: "Casa Port",
       city: "Casablanca",
+      label: "Casa Port",
+      value: 4,
     },
   ];
 
@@ -46,23 +59,17 @@ const SearchScreen = ({ navigation }) => {
 
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
-  const [showDate, setShowDate] = useState(false);
-  const [showTime, setShowTime] = useState(false);
+  const [showDate, setShowDate] = useState(isDateShowed);
+  const [showTime, setShowTime] = useState(isTimeShowed);
   const [departure, setDeparture] = useState(1);
   const [arrival, setArrival] = useState(1);
-  if (Platform.OS === "android") {
-    console.log("Android");
-    useEffect(() => {
-      setShowDate(false);
-      setShowTime(false);
-    }, []);
-  } else {
-    useEffect(() => {
-      setShowDate(true);
-      setShowTime(true);
-    }, []);
-    console.log("IPHONE de ALI");
-  }
+  // if (Platform.OS === "ios") {
+  //   useEffect(() => {
+  //     setShowDate(true);
+  //     setShowTime(true);
+  //   }, []);
+  //   console.log("IPHONE de ALI");
+  // }
 
   //console.log("Date : " + date + " Time :" + time);
   const onChangeDate = (event, selectedDate) => {
@@ -96,6 +103,43 @@ const SearchScreen = ({ navigation }) => {
   const formatTime = () => {
     return time.getHours() + ":" + time.getMinutes();
   };
+  console.log(departure);
+  const getPicker = (data, list, setData, placeholder) => {
+    // if (Platform.OS === "ios") {
+    //   return (
+    //     <RNPickerSelect
+    //       style={{
+    //         inputIOS: {},
+    //         placeholder: {
+    //           marginLeft: 10,
+    //           color: "black",
+    //         },
+    //       }}
+    //       onValueChange={(value) => setData(value)}
+    //       items={list}
+    //     />
+    //   );
+    // } else {
+    return (
+      <Picker
+        mode="dropdown"
+        selectedValue={data}
+        onValueChange={(itemValue, itemIndex) => {
+          setData(itemValue);
+        }}
+      >
+        {list.map((departure, key) => {
+          return (
+            <Picker.Item
+              key={key}
+              label={departure.stationName}
+              value={departure.id}
+            />
+          );
+        })}
+      </Picker>
+    );
+  };
   return (
     <>
       <DismissKeyboard>
@@ -109,45 +153,40 @@ const SearchScreen = ({ navigation }) => {
                 placeholderTextColor="black"
               />
             </View>
+            <Text style={{ marginLeft: 35 }}>Departure</Text>
             <View style={styles.inputStyle}>
               {/* <TextInput
             style={styles.textInputStyle}
             placeholder="Departure"
             placeholderTextColor="black"
           /> */}
-              <Picker
+              {/* <Picker
                 mode="dropdown"
                 selectedValue={departure}
                 onValueChange={(itemValue, itemIndex) => {
                   setDeparture(itemValue);
                 }}
               >
-                {/* <FlatList
-                  data={departures}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => {
-                    return (
-                      <Picker.Item label={item.stationName} value={item.id} />
-                    );
-                  }}
-                /> */}
                 {departures.map((departure, key) => {
                   return (
                     <Picker.Item
+                      key={key}
                       label={departure.stationName}
                       value={departure.id}
                     />
                   );
                 })}
-              </Picker>
+              </Picker> */}
+              {getPicker(departure, departures, setDeparture, "Departure")}
             </View>
+            <Text style={{ marginLeft: 35 }}>Arrival</Text>
             <View style={styles.inputStyle}>
               {/* <TextInput
             style={styles.textInputStyle}
             placeholder="Arrival"
             placeholderTextColor="black"
           /> */}
-              <Picker
+              {/* <Picker
                 mode="dropdown"
                 selectedValue={arrival}
                 onValueChange={(itemValue, itemIndex) => setArrival(itemValue)}
@@ -155,25 +194,30 @@ const SearchScreen = ({ navigation }) => {
                 {departures.map((arrival, key) => {
                   return (
                     <Picker.Item
+                      key={key}
                       label={arrival.stationName}
                       value={arrival.id}
                     />
                   );
                 })}
-              </Picker>
+              </Picker> */}
+              {getPicker(arrival, departures, setArrival, "Arrival")}
             </View>
             <View style={styles.DateTimePickerStyle}>
               <View style={styles.datestyle}>
-                <View style={styles.dateInput}>
-                  <TouchableOpacity onPress={showDatepicker}>
-                    <TextInput
-                      editable={false}
-                      value={formatDate()}
-                      placeholder="Date"
-                    />
-                  </TouchableOpacity>
-                </View>
+                {Platform.OS !== "ios" && (
+                  <View style={styles.dateInput}>
+                    <TouchableOpacity onPress={showDatepicker}>
+                      <TextInput
+                        editable={false}
+                        value={formatDate()}
+                        placeholder="Date"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View style={styles.date}>
+                  {Platform.OS === "ios" && <Text>Date</Text>}
                   {showDate && (
                     <DateTimePicker
                       testID="dateTimePicker"
@@ -187,21 +231,24 @@ const SearchScreen = ({ navigation }) => {
                 </View>
               </View>
               <View style={styles.timestyle}>
-                <View style={styles.dateInput}>
-                  <TouchableOpacity onPress={showTimepicker}>
-                    <TextInput
-                      editable={false}
-                      placeholderTextColor="black"
-                      value={formatTime()}
-                      placeholder="Time"
-                    />
-                  </TouchableOpacity>
-                </View>
+                {Platform.OS !== "ios" && (
+                  <View style={styles.dateInput}>
+                    <TouchableOpacity onPress={showTimepicker}>
+                      <TextInput
+                        editable={false}
+                        placeholderTextColor="black"
+                        value={formatTime()}
+                        placeholder="Time"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View style={styles.time}>
+                  {Platform.OS === "ios" && <Text>Time</Text>}
                   {showTime && (
                     <DateTimePicker
                       testID="dateTimePicker"
-                      value={date}
+                      value={time}
                       mode="time"
                       is24Hour={true}
                       display="default"
@@ -235,6 +282,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 55,
     marginVertical: 15,
+    justifyContent: "center",
+    overflow: "hidden",
   },
   textInputStyle: {
     flex: 1,
