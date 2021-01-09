@@ -13,22 +13,24 @@ import {
 const WelcomeScreen = ({ navigation }) => {
   return (
     <View style={styles.ViewStyle}>
-      <StatusBar style="light" backgroundColor="#2C3E50" />
-      <View style={styles.ChildViewStyle}>
-        <Image
-          style={styles.ImageStyle}
-          source={require("../../assets/transport.png")}
-        />
-        <Text style={styles.TextStyle}>
-          This app provides information about available transport
-        </Text>
+      <View>
+        <StatusBar style="light" backgroundColor="#2C3E50" />
+        <View style={styles.ChildViewStyle}>
+          <Image
+            style={styles.ImageStyle}
+            source={require("../../assets/transport.png")}
+          />
+          <Text style={styles.TextStyle}>
+            This app provides information about available transport
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.ButtonStyle}
+          onPress={() => navigation.navigate("Information")}
+        >
+          <Text style={styles.ButtonTextStyle}>Get Started</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.ButtonStyle}
-        onPress={() => navigation.navigate("Information")}
-      >
-        <Text style={styles.ButtonTextStyle}>Get Started</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -38,6 +40,7 @@ export default WelcomeScreen;
 const styles = StyleSheet.create({
   ViewStyle: {
     marginVertical: 120,
+    flex: 1,
   },
   ChildViewStyle: {
     alignItems: "center",

@@ -15,6 +15,17 @@ import { Checkbox } from "react-native-paper";
 import { useEffect } from "react";
 
 const InformationScreen = ({ navigation }) => {
+  //Navigation Options
+  const [title, setTitle] = useState("Info");
+  useEffect(() => {
+    navigation.setParams({
+      title: "Info",
+    });
+  }, []);
+  InformationScreen.navigationOptions = () => ({
+    title,
+  });
+
   const [checked, setChecked] = useState("homme");
   const [opacity, setOpacity] = useState([0.2, 0]);
   const [selected, setSelected] = useState(false);

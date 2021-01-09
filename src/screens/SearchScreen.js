@@ -14,7 +14,18 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-const SearchScreen = ({ route, navigation }) => {
+const SearchScreen = ({ navigation }) => {
+  const [title, setTitle] = useState("Search");
+
+  useEffect(() => {
+    navigation.setParams({
+      title: "Search",
+    });
+  }, []);
+  SearchScreen.navigationOptions = () => ({
+    title,
+  });
+
   const { isDateShowed, isTimeShowed } = {
     isDateShowed: navigation.getParam("isDateShowed"),
     isTimeShowed: navigation.getParam("isTimeShowed"),
@@ -103,7 +114,6 @@ const SearchScreen = ({ route, navigation }) => {
   const formatTime = () => {
     return time.getHours() + ":" + time.getMinutes();
   };
-  console.log(departure);
   const getPicker = (data, list, setData, placeholder) => {
     // if (Platform.OS === "ios") {
     //   return (
