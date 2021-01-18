@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Fontisto } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const ResultDetails = ({ data }) => {
+const ResultDetails = ({ data, destinations }) => {
+  const list = ["Casablanca", "Mohammadia", "Rabat", "Kenitra", "Tanger"];
+
   return (
     <View style={styles.blocStyle}>
       <View></View>
@@ -13,7 +15,7 @@ const ResultDetails = ({ data }) => {
         </View>
         <View style={styles.infoStyle}>
           <Text style={styles.headerStyle}>
-            Via {data.moyen} N=°{data.id}
+            Via {data.preference} N=°{data.id}
           </Text>
           <View style={styles.subInfoStyle}>
             <MaterialIcons name="departure-board" size={24} color="black" />
@@ -21,7 +23,9 @@ const ResultDetails = ({ data }) => {
               <Text style={styles.textStyle}>
                 Departure: {data.departureTime}
               </Text>
-              <Text style={styles.textStyle}>Arrival: {data.arrivalTime}</Text>
+              <Text style={styles.textStyle}>
+                Arrival: {data.transitTime[list.indexOf(destinations.arrival)]}
+              </Text>
             </View>
           </View>
         </View>

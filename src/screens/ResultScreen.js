@@ -8,7 +8,7 @@ import {
   Keyboard,
   ScrollView,
 } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { FlatList, TextInput } from "react-native-gesture-handler";
 import { RadioButton } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
 import { Checkbox } from "react-native-paper";
@@ -25,25 +25,11 @@ const ResultScreen = ({ navigation }) => {
   ResultScreen.navigationOptions = () => ({
     title,
   });
-  const departureExemple = "Rabat Agdal";
-  const arrivalExemple = "Casablanca Voyageurs";
-  const exemple1 = {
-    moyen: "Train",
-    id: 1,
-    departureTime: "12:30",
-    arrivalTime: "13:30",
-  };
-  const exemple2 = {
-    moyen: "Bus",
-    id: 2,
-    departureTime: "12:10",
-    arrivalTime: "13:30",
-  };
-  const exemple3 = {
-    moyen: "Velo",
-    id: 3,
-    departureTime: "15:30",
-    arrivalTime: "16:30",
+
+  const { departure, arrival, data } = {
+    departure: navigation.getParam("departure"),
+    arrival: navigation.getParam("arrival"),
+    data: navigation.getParam("response"),
   };
 
   return (
@@ -51,7 +37,7 @@ const ResultScreen = ({ navigation }) => {
       <Text style={styles.headerTextStyle}>Search Results :</Text>
       <View style={styles.rangeViewStyleInput}>
         <View style={styles.rangeInputStyle}>
-          <Text style={styles.rangeTextStyle}>{departureExemple}</Text>
+          <Text style={styles.rangeTextStyle}>{departure}</Text>
         </View>
         {/* <Text style={{ color: "white", alignSelf: "center" }}> - </Text> */}
         <AntDesign
@@ -61,13 +47,22 @@ const ResultScreen = ({ navigation }) => {
           color="black"
         />
         <View style={styles.rangeInputStyle}>
-          <Text style={styles.rangeTextStyle}>{arrivalExemple}</Text>
+          <Text style={styles.rangeTextStyle}>{arrival}</Text>
         </View>
       </View>
       <ScrollView style={styles.resultStyle}>
-        <ResultDetails data={exemple1} />
-        <ResultDetails data={exemple2} />
-        <ResultDetails data={exemple3} />
+        <FlatList
+          keyExtractor={data.arrivalTime}
+          data={data}
+          renderItem={({ item }) => {
+            return (
+              <ResultDetails
+                data={item}
+                destinations={{ arrival: arrival, departure: departure }}
+              />
+            );
+          }}
+        />
       </ScrollView>
     </>
   );

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Service from "../api/Service";
 
 const SearchScreen = ({ navigation }) => {
   const [title, setTitle] = useState("Search");
@@ -26,38 +27,36 @@ const SearchScreen = ({ navigation }) => {
     title,
   });
 
-  const { isDateShowed, isTimeShowed } = {
+  const { isDateShowed, isTimeShowed, Mypreference } = {
     isDateShowed: navigation.getParam("isDateShowed"),
     isTimeShowed: navigation.getParam("isTimeShowed"),
+    Mypreference: navigation.getParam("preference"),
   };
   const departures = [
     {
       id: 1,
-      stationName: "Rabat Agdal",
-      city: "Rabat",
-      label: "Rabat Agdal",
+      city: "Casablanca",
       value: 1,
     },
     {
       id: 2,
-      stationName: "Rabat Ville",
-      city: "Rabat",
-      label: "Rabat Ville",
+      city: "Mohammadia",
       value: 2,
     },
     {
       id: 3,
-      stationName: "Casa Voyageurs",
-      city: "Casablanca",
-      label: "Casa Voyageurs",
+      city: "Rabat",
       value: 3,
     },
     {
       id: 4,
-      stationName: "Casa Port",
-      city: "Casablanca",
-      label: "Casa Port",
+      city: "Kenitra",
       value: 4,
+    },
+    {
+      id: 5,
+      city: "Tanger",
+      value: 5,
     },
   ];
 
@@ -72,8 +71,8 @@ const SearchScreen = ({ navigation }) => {
   const [time, setTime] = useState(new Date());
   const [showDate, setShowDate] = useState(isDateShowed);
   const [showTime, setShowTime] = useState(isTimeShowed);
-  const [departure, setDeparture] = useState(1);
-  const [arrival, setArrival] = useState(1);
+  const [departure, setDeparture] = useState("Casablanca");
+  const [arrival, setArrival] = useState("Tanger");
   // if (Platform.OS === "ios") {
   //   useEffect(() => {
   //     setShowDate(true);
@@ -107,14 +106,28 @@ const SearchScreen = ({ navigation }) => {
   };
 
   const formatDate = () => {
+    console.log(
+      date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear()
+    );
     return (
       date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear()
     );
   };
   const formatTime = () => {
-    return time.getHours() + ":" + time.getMinutes();
+    if (time.getHours().toString().length == 1) {
+      return "0" + time.getHours() + ":" + time.getMinutes();
+    } else if (time.getMinutes().toString().length == 1) {
+      return time.getHours() + ":0" + time.getMinutes();
+    } else if (
+      time.getHours().toString().length == 1 &&
+      time.getMinutes().toString().length == 1
+    ) {
+      return "0" + time.getHours() + ":" + "0" + time.getMinutes();
+    } else {
+      return time.getHours() + ":" + time.getMinutes();
+    }
   };
-  const getPicker = (data, list, setData, placeholder) => {
+  const getPicker = (data, list, setData, placeholder, setter) => {
     // if (Platform.OS === "ios") {
     //   return (
     //     <RNPickerSelect
@@ -136,41 +149,82 @@ const SearchScreen = ({ navigation }) => {
         selectedValue={data}
         onValueChange={(itemValue, itemIndex) => {
           setData(itemValue);
+          setter(itemValue);
         }}
       >
         {list.map((departure, key) => {
           return (
             <Picker.Item
               key={key}
-              label={departure.stationName}
-              value={departure.id}
+              label={departure.city}
+              value={departure.city}
             />
           );
         })}
       </Picker>
     );
   };
+
+  const [preference, setPreference] = useState(Mypreference);
+  const [Mydeparture, setMyDeparture] = useState("Casablanca");
+  const [Myarrival, setMyArrival] = useState("Tanger");
+
+  const search = () => {
+    if (preference == null || Mydeparture == null || Myarrival == null) {
+      alert("Fill all the form");
+    } else {
+      const searchReq = {
+        preference: preference,
+        departure: Mydeparture,
+        arrival: Myarrival,
+        date: formatDate(),
+        time: formatTime(),
+      };
+      console.log(searchReq);
+      Service.post("/search", searchReq)
+        .then((response) => {
+          console.log(response.data);
+          navigation.navigate("Result", {
+            response: response.data,
+            arrival: arrival,
+            departure: departure,
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  };
+
   return (
     <>
-      <DismissKeyboard>
+      <>
         <View>
           <Text style={styles.headerTextStyle}>Next departure</Text>
           <View>
             <View style={styles.inputStyle}>
-              <TextInput
-                style={styles.textInputStyle}
-                placeholder="Transport preference"
-                placeholderTextColor="black"
-              />
+              <Picker
+                mode="dropdown"
+                selectedValue={preference}
+                onValueChange={(itemValue) => {
+                  setPreference(itemValue);
+                }}
+              >
+                <Picker.Item label={"Train"} value={"Train"} />
+                <Picker.Item label={"Bus"} value={"Bus"} />
+                <Picker.Item label={"Tram"} value={"Tram"} />
+                <Picker.Item label={"Covoiturage"} value={"Covoiturage"} />
+              </Picker>
             </View>
-            <Text style={{ marginLeft: 35 }}>Departure</Text>
-            <View style={styles.inputStyle}>
-              {/* <TextInput
+          </View>
+          <Text style={{ marginLeft: 35 }}>Departure</Text>
+          <View style={styles.inputStyle}>
+            {/* <TextInput
             style={styles.textInputStyle}
             placeholder="Departure"
             placeholderTextColor="black"
           /> */}
-              {/* <Picker
+            {/* <Picker
                 mode="dropdown"
                 selectedValue={departure}
                 onValueChange={(itemValue, itemIndex) => {
@@ -187,16 +241,22 @@ const SearchScreen = ({ navigation }) => {
                   );
                 })}
               </Picker> */}
-              {getPicker(departure, departures, setDeparture, "Departure")}
-            </View>
-            <Text style={{ marginLeft: 35 }}>Arrival</Text>
-            <View style={styles.inputStyle}>
-              {/* <TextInput
+            {getPicker(
+              departure,
+              departures,
+              setDeparture,
+              "Departure",
+              setMyDeparture
+            )}
+          </View>
+          <Text style={{ marginLeft: 35 }}>Arrival</Text>
+          <View style={styles.inputStyle}>
+            {/* <TextInput
             style={styles.textInputStyle}
             placeholder="Arrival"
             placeholderTextColor="black"
           /> */}
-              {/* <Picker
+            {/* <Picker
                 mode="dropdown"
                 selectedValue={arrival}
                 onValueChange={(itemValue, itemIndex) => setArrival(itemValue)}
@@ -211,74 +271,79 @@ const SearchScreen = ({ navigation }) => {
                   );
                 })}
               </Picker> */}
-              {getPicker(arrival, departures, setArrival, "Arrival")}
-            </View>
-            <View style={styles.DateTimePickerStyle}>
-              <View style={styles.datestyle}>
-                {Platform.OS !== "ios" && (
-                  <View style={styles.dateInput}>
-                    <TouchableOpacity onPress={showDatepicker}>
-                      <TextInput
-                        editable={false}
-                        value={formatDate()}
-                        placeholder="Date"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                <View style={styles.date}>
-                  {Platform.OS === "ios" && <Text>Date</Text>}
-                  {showDate && (
-                    <DateTimePicker
-                      testID="dateTimePicker"
-                      value={date}
-                      mode="date"
-                      is24Hour={true}
-                      display="default"
-                      onChange={onChangeDate}
+            {getPicker(
+              arrival,
+              departures,
+              setArrival,
+              "Arrival",
+              setMyArrival
+            )}
+          </View>
+          <View style={styles.DateTimePickerStyle}>
+            <View style={styles.datestyle}>
+              {Platform.OS !== "ios" && (
+                <View style={styles.dateInput}>
+                  <TouchableOpacity onPress={showDatepicker}>
+                    <TextInput
+                      editable={false}
+                      value={formatDate()}
+                      placeholder="Date"
                     />
-                  )}
+                  </TouchableOpacity>
                 </View>
-              </View>
-              <View style={styles.timestyle}>
-                {Platform.OS !== "ios" && (
-                  <View style={styles.dateInput}>
-                    <TouchableOpacity onPress={showTimepicker}>
-                      <TextInput
-                        editable={false}
-                        placeholderTextColor="black"
-                        value={formatTime()}
-                        placeholder="Time"
-                      />
-                    </TouchableOpacity>
-                  </View>
+              )}
+              <View style={styles.date}>
+                {Platform.OS === "ios" && <Text>Date</Text>}
+                {showDate && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={date}
+                    mode="date"
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChangeDate}
+                  />
                 )}
-                <View style={styles.time}>
-                  {Platform.OS === "ios" && <Text>Time</Text>}
-                  {showTime && (
-                    <DateTimePicker
-                      testID="dateTimePicker"
-                      value={time}
-                      mode="time"
-                      is24Hour={true}
-                      display="default"
-                      onChange={onChangeTime}
-                    />
-                  )}
-                </View>
               </View>
             </View>
-            <View>
-              <TouchableOpacity
-                style={styles.ButtonStyle}
-                onPress={() => navigation.navigate("Result")}
-              >
-                <Text style={styles.ButtonTextStyle}>Search</Text>
-              </TouchableOpacity>
+            <View style={styles.timestyle}>
+              {Platform.OS !== "ios" && (
+                <View style={styles.dateInput}>
+                  <TouchableOpacity onPress={showTimepicker}>
+                    <TextInput
+                      editable={false}
+                      placeholderTextColor="black"
+                      value={formatTime()}
+                      placeholder="Time"
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+              <View style={styles.time}>
+                {Platform.OS === "ios" && <Text>Time</Text>}
+                {showTime && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={time}
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChangeTime}
+                  />
+                )}
+              </View>
             </View>
           </View>
+          <View>
+            <TouchableOpacity
+              style={styles.ButtonStyle}
+              onPress={() => search()}
+            >
+              <Text style={styles.ButtonTextStyle}>Search</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </DismissKeyboard>
+      </>
     </>
   );
 };

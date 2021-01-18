@@ -13,6 +13,8 @@ import { RadioButton } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
 import { Checkbox } from "react-native-paper";
 import { useEffect } from "react";
+import { Picker } from "@react-native-picker/picker";
+import Service from "../api/Service";
 
 const InformationScreen = ({ navigation }) => {
   //Navigation Options
@@ -48,9 +50,52 @@ const InformationScreen = ({ navigation }) => {
     isTimeShowed: showTime,
   };
 
+  //button disable
+  const [disabled, setDisabled] = useState(true);
+
+  //user object
+  const [age, setAge] = useState(null);
+  const [sexe, setSexe] = useState("homme");
+  const [preference, setPreference] = useState("Train");
+  const [priceMin, setPriceMin] = useState(null);
+  const [priceMax, setPriceMax] = useState(null);
+  const [handicap, setHandicap] = useState(false);
+
+  const addUser = () => {
+    console.log(age + " " + preference + " " + priceMin + " " + priceMax);
+    if (
+      age == null ||
+      preference == null ||
+      priceMin == null ||
+      priceMax == null
+    ) {
+      alert("Fill all the form");
+    } else {
+      const user = {
+        age: age,
+        sexe: sexe,
+        preference: preference,
+        pricemin: priceMin,
+        pricemax: priceMax,
+        handicap: handicap,
+      };
+      Service.post("/addUser", user)
+        .then(() => {
+          navigation.navigate("Search", {
+            isDateShowed: showDate,
+            isTimeShowed: showTime,
+            preference: preference,
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  };
+
   return (
     <>
-      <DismissKeyboard>
+      <>
         <View>
           <Text style={styles.headerTextStyle}>
             Fill the form below with your information:
@@ -62,6 +107,8 @@ const InformationScreen = ({ navigation }) => {
                 style={styles.textInputStyle}
                 placeholder="Age"
                 placeholderTextColor="black"
+                value={age}
+                onChangeText={setAge}
               />
             </View>
             <View
@@ -84,6 +131,7 @@ const InformationScreen = ({ navigation }) => {
                     onPress={() => {
                       setChecked("homme");
                       setOpacity([0.2, 0]);
+                      setSexe("homme");
                     }}
                   />
                   <Text style={{ fontSize: 16 }}>Homme</Text>
@@ -103,6 +151,7 @@ const InformationScreen = ({ navigation }) => {
                     onPress={() => {
                       setChecked("femme");
                       setOpacity([0, 0.2]);
+                      setSexe("femme");
                     }}
                   />
                   <Text style={{ fontSize: 16 }}>Femme</Text>
@@ -110,25 +159,32 @@ const InformationScreen = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.inputStyle}>
-              <TextInput
-                style={styles.textInputStyle}
-                placeholder="Transport preference"
-                placeholderTextColor="black"
-              />
+              <Picker
+                mode="dropdown"
+                selectedValue={preference}
+                onValueChange={(itemValue) => {
+                  setPreference(itemValue);
+                }}
+              >
+                <Picker.Item label={"Train"} value={"Train"} />
+                <Picker.Item label={"Bus"} value={"Bus"} />
+                <Picker.Item label={"Tram"} value={"Tram"} />
+                <Picker.Item label={"Covoiturage"} value={"Covoiturage"} />
+              </Picker>
             </View>
 
             <Text style={{ marginTop: 20, marginLeft: 40 }}>Price range:</Text>
             <View style={styles.rangeViewStyleInput}>
-              <DismissKeyboard>
-                <View style={styles.rangeInputStyle}>
-                  <TextInput
-                    keyboardType="numeric"
-                    style={styles.rangeTextStyle}
-                    placeholder="From"
-                    placeholderTextColor="black"
-                  />
-                </View>
-              </DismissKeyboard>
+              <View style={styles.rangeInputStyle}>
+                <TextInput
+                  keyboardType="numeric"
+                  style={styles.rangeTextStyle}
+                  placeholder="From"
+                  placeholderTextColor="black"
+                  value={priceMin}
+                  onChangeText={setPriceMin}
+                />
+              </View>
               {/* <Text style={{ color: "white", alignSelf: "center" }}> - </Text> */}
               <AntDesign
                 style={{ alignSelf: "center" }}
@@ -142,6 +198,8 @@ const InformationScreen = ({ navigation }) => {
                   style={styles.rangeTextStyle}
                   placeholder="To"
                   placeholderTextColor="black"
+                  value={priceMax}
+                  onChangeText={setPriceMax}
                 />
               </View>
             </View>
@@ -150,6 +208,7 @@ const InformationScreen = ({ navigation }) => {
                 status={selected ? "checked" : "unchecked"}
                 onPress={() => {
                   setSelected(!selected);
+                  setHandicap(!selected);
                 }}
               />
               <Text>Any Handicap?</Text>
@@ -166,18 +225,15 @@ const InformationScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.TouchableOpacityStyle}
-              onPress={() =>
-                navigation.navigate("Search", {
-                  isDateShowed: showDate,
-                  isTimeShowed: showTime,
-                })
-              }
+              onPress={() => {
+                addUser();
+              }}
             >
               <Text style={styles.ButtonTextStyle}>Submit</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </DismissKeyboard>
+      </>
     </>
   );
 };
@@ -190,6 +246,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 35,
     borderRadius: 8,
     height: 55,
+    justifyContent: "center",
+    overflow: "hidden",
   },
   checkboxGroup: {
     flexDirection: "row",
